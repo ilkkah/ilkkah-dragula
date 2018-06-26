@@ -39,7 +39,15 @@ function dragula (initialContainers, options) {
   if (o.direction === void 0) { o.direction = 'vertical'; }
   if (o.ignoreInputTextSelection === void 0) { o.ignoreInputTextSelection = true; }
   if (o.mirrorContainer === void 0) { o.mirrorContainer = doc.body; }
-  if (o.animate === void 0) { o.animate = { duration: 150, upBuffer: 0, downBuffer: 0 } }
+  if (o.animate === void 0) {
+    o.animate = {
+      duration: 150,
+      upBuffer: 0,
+      downBuffer: 0,
+      bufferClass: 'container',
+      noAnimateClass: '',
+    }
+  }
 
   var drake = emitter({
     containers: o.containers,
@@ -355,51 +363,72 @@ function dragula (initialContainers, options) {
     }
   }
 
-  var mouseStart = 0;
+  var mouseStartY = 0;
+  var mouseStartX = 0;
   var direction = null;
 
   function animate(item, sibling, d, target) {
-    var prevSibling = sibling;
-    var nextSibling = nextEl(item);
 
-    function runAnimation(sib, iNeg, sNeg) {
-      let moveBuffer = { sib: 0, item: 0 };
-      if (iNeg === '-' && sNeg === '') {
-        moveBuffer.item = o.animate.upBuffer;
-      } else if (iNeg === '' && sNeg === '-'){
-        moveBuffer.item = o.animate.downBuffer;
+    const classes = [].slice.apply(target.classList);
+
+    var hasNoAnimateClass = classes.some(function(v) {
+      return o.animate.noAnimateClass.indexOf(v) >= 0;
+    });
+
+
+    if (!hasNoAnimateClass) {
+      var prevSibling = sibling;
+      var nextSibling = nextEl(item);
+
+      function runAnimation(sib, iNeg, sNeg) {
+        let moveBuffer = { sib: 0, item: 0 };
+
+        var hasBufferClass = classes.some(function(v) {
+          return o.animate.bufferClass.indexOf(v) >= 0;
+        });
+
+        if (hasBufferClass) {
+          if (iNeg === '-' && sNeg === '') {
+            moveBuffer.item = o.animate.upBuffer;
+          } else if (iNeg === '' && sNeg === '-'){
+            moveBuffer.item = o.animate.downBuffer;
+          }
+        }
+
+        var itemStyles = window.getComputedStyle(item);
+        var itemRect = item.getBoundingClientRect();
+        var sibStyles = window.getComputedStyle(sib);
+        var sibRect = sib.getBoundingClientRect();
+        var newItemPos = parseInt(sibStyles.height, 10) +
+                         parseInt(sibStyles.marginTop, 10);
+        var newSibPos = parseInt(itemStyles.height, 10) +
+                        parseInt(itemStyles.marginBottom, 10);
+        sib.style.transition = `all ${o.animate.duration}ms`;
+        sib.style.transform = `translateY(${sNeg}${newSibPos}px)`;
+        item.style.transition = `all ${o.animate.duration}ms`;
+        item.style.transform = `translateY(${iNeg}${newItemPos + moveBuffer.item}px)`;
+        setTimeout(function() {
+          sib.style.transition = '';
+          sib.style.transform = '';
+          item.style.transition = '';
+          item.style.transform = '';
+          target.insertBefore(item, sibling);
+        }, o.animate.duration);
+      };
+
+      if (prevSibling && d === 'up') {
+        // animate the previous sibling down & the item up
+        runAnimation(prevSibling, '-', '');
       }
-      var itemStyles = window.getComputedStyle(item);
-      var itemRect = item.getBoundingClientRect();
-      var sibStyles = window.getComputedStyle(sib);
-      var sibRect = sib.getBoundingClientRect();
-      var newItemPos = parseInt(sibStyles.height, 10) +
-                       parseInt(sibStyles.marginTop, 10);
-      var newSibPos = parseInt(itemStyles.height, 10) +
-                      parseInt(itemStyles.marginBottom, 10);
-      sib.style.transition = `all ${o.animate.duration}ms`;
-      sib.style.transform = `translateY(${sNeg}${newSibPos}px)`;
-      item.style.transition = `all ${o.animate.duration}ms`;
-      item.style.transform = `translateY(${iNeg}${newItemPos + moveBuffer.item}px)`;
-      setTimeout(function() {
-        sib.style.transition = '';
-        sib.style.transform = '';
-        item.style.transition = '';
-        item.style.transform = '';
+      if (nextSibling && d === 'down') {
+        // animate the previous sibling up & the item down
+        runAnimation(nextSibling, '', '-');
+      }
+
+      if (!sibling && !nextSibling) {
         target.insertBefore(item, sibling);
-      }, o.animate.duration);
-    };
-
-    if (prevSibling && d === 'up') {
-      // animate the previous sibling down & the item up
-      runAnimation(prevSibling, '-', '');
-    }
-    if (nextSibling && d === 'down') {
-      // animate the previous sibling up & the item down
-      runAnimation(nextSibling, '', '-');
-    }
-
-    if (!sibling && !nextSibling) {
+      }
+    } else {
       target.insertBefore(item, sibling);
     }
   };
@@ -416,13 +445,21 @@ function dragula (initialContainers, options) {
     var y = clientY - _offsetY;
 
     // determine if mouse is moving up or down
-    if (event.pageY < mouseStart) {
+    if (event.pageY < mouseStartY) {
       direction = 'up';
     }
-    if (event.pageY > mouseStart) {
+    if (event.pageY > mouseStartY) {
       direction = 'down';
     }
-    mouseStart = event.pageY;
+    if (event.pageX < mouseStartX) {
+      direction = "left"
+    }
+    if (event.pageX > mouseStartX) {
+      direction = "right"
+    }
+
+    mouseStartY = event.pageY;
+    mouseStartX = event.pageX;
 
     _mirror.style.left = x + 'px';
     _mirror.style.top = y + 'px';
