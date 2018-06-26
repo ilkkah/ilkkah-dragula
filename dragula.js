@@ -39,7 +39,7 @@ function dragula (initialContainers, options) {
   if (o.direction === void 0) { o.direction = 'vertical'; }
   if (o.ignoreInputTextSelection === void 0) { o.ignoreInputTextSelection = true; }
   if (o.mirrorContainer === void 0) { o.mirrorContainer = doc.body; }
-  if (o.animate === void 0) { o.animate = { duration: 150, upBuffer: 0, downBuffer: 0 } }
+  if (o.animate === void 0) { o.animate = { duration: 150, upBuffer: 20, downBuffer: 0 } }
 
   var drake = emitter({
     containers: o.containers,
@@ -367,9 +367,6 @@ function dragula (initialContainers, options) {
       if (iNeg === '-' && sNeg === '') {
         moveBuffer.sib = o.animate.downBuffer;
         moveBuffer.item = o.animate.upBuffer;
-      } else if (iNeg === '' && sNeg === '-'){
-        moveBuffer.sib = o.animate.upBuffer;
-        moveBuffer.item = o.animate.downBuffer;
       }
       var itemStyles = window.getComputedStyle(item);
       var itemRect = item.getBoundingClientRect();
