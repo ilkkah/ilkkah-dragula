@@ -39,7 +39,7 @@ function dragula (initialContainers, options) {
   if (o.direction === void 0) { o.direction = 'vertical'; }
   if (o.ignoreInputTextSelection === void 0) { o.ignoreInputTextSelection = true; }
   if (o.mirrorContainer === void 0) { o.mirrorContainer = doc.body; }
-  if (o.animate === void 0) { o.animate = { duration: 150, moveBuffer: 0 } }
+  if (o.animate === void 0) { o.animate = { duration: 150, upBuffer: 0, downBuffer: 0 } }
 
   var drake = emitter({
     containers: o.containers,
@@ -363,6 +363,14 @@ function dragula (initialContainers, options) {
     var nextSibling = nextEl(item);
 
     function runAnimation(sib, iNeg, sNeg) {
+      let moveBuffer = { sib: 0, item: 0 };
+      if (iNeg === '-' && sNeg === '') {
+        moveBuffer.sib = o.animate.downBuffer;
+        moveBuffer.item = o.animate.upBuffer;
+      } else if (iNeg === '' && sNeg === '-'){
+        moveBuffer.sib = o.animate.upBuffer;
+        moveBuffer.item = o.animate.downBuffer;
+      }
       var itemStyles = window.getComputedStyle(item);
       var itemRect = item.getBoundingClientRect();
       var sibStyles = window.getComputedStyle(sib);
@@ -372,9 +380,9 @@ function dragula (initialContainers, options) {
       var newSibPos = parseInt(itemStyles.height, 10) +
                       parseInt(itemStyles.marginBottom, 10);
       sib.style.transition = `all ${o.animate.duration}ms`;
-      sib.style.transform = `translateY(${sNeg}${newSibPos + o.animate.moveBuffer}px)`;
+      sib.style.transform = `translateY(${sNeg}${newSibPos + moveBuffer.sib}px)`;
       item.style.transition = `all ${o.animate.duration}ms`;
-      item.style.transform = `translateY(${iNeg}${newItemPos + o.animate.moveBuffer}px)`;
+      item.style.transform = `translateY(${iNeg}${newItemPos + moveBuffer.item}px)`;
       setTimeout(function() {
         sib.style.transition = '';
         sib.style.transform = '';
