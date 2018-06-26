@@ -436,10 +436,19 @@ function dragula (initialContainers, options) {
         var itemRect = item.getBoundingClientRect();
         var sibStyles = window.getComputedStyle(sib);
         var sibRect = sib.getBoundingClientRect();
+        let sMargin = sibStyles.marginBottom;
+        let iMargin = itemStyles.marginBottom;
+        // compensate for last child no margins
+        if (sMargin !== iMargin) {
+          const margin = parseInt(itemStyles.marginBottom ,10) !== 0 ? parseInt(itemStyles.marginBottom ,10) :
+                   parseInt(sibStyles.marginBottom, 10);
+          sMargin = margin;
+          iMargin = margin;
+        };
         var newItemPos = parseInt(sibStyles.height, 10) +
-                         parseInt(sibStyles.marginBottom, 10);
+                         parseInt(sMargin, 10);
         var newSibPos = parseInt(itemStyles.height, 10) +
-                        parseInt(itemStyles.marginBottom, 10);
+                        parseInt(iMargin, 10);
         sib.style.transition = `all ${o.animate.duration}ms`;
         sib.style.transform = `translateY(${sNeg}${newSibPos}px)`;
         item.style.transition = `all ${o.animate.duration}ms`;

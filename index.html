@@ -200,16 +200,24 @@ dragula([document.getElementById(left), document.getElementById(right)], {
     </pre>
     <div>There are a few similar mechanisms to determine whether an element can be dragged from a certain container <a href='https://github.com/bevacqua/dragula#optionsmoves'>(<code>moves</code>)</a>, whether an element can be dropped into a certain container at a certain position <a href='https://github.com/bevacqua/dragula#optionsaccepts'>(<code>accepts</code>)</a>, and whether an element is able to originate a drag event <a href='https://github.com/bevacqua/dragula#optionsinvalid'>(<code>invalid</code>)</a>.</div>
   </div>
+  <style media="screen">
+    .container > .test-item {
+      margin-bottom: 20px;
+    }
+    .container > .test-item:last-child {
+      margin-bottom: 0;
+    }
+  </style>
   <div class='parent'>
     <label><strong>Click or Drag!</strong> Fires a click when the mouse button is released before a <code>mousemove</code> event, otherwise a drag event is fired. No extra configuration is necessary.</label>
     <div class='wrapper'>
       <div id='sortable' class='container'>
-        <div>Clicking on these elements triggers a regular <code>click</code> event you can listen to.</div>
-        <div>Try dragging or clicking on this element.</div>
-        <div>Note how you can click normally?</div>
-        <div>Drags don't trigger click events.</div>
-        <div>Clicks don't end up in a drag, either.</div>
-        <div>This is useful if you have elements that can be both clicked or dragged.</div>
+        <div class="test-item">Clicking on these elements triggers a regular <code>click</code> event you can listen to.</div>
+        <div class="test-item">Try dragging or clicking on this element.</div>
+        <div class="test-item">Note how you can click normally?</div>
+        <div class="test-item">Drags don't trigger click events.</div>
+        <div class="test-item">Clicks don't end up in a drag, either.</div>
+        <div class="test-item">This is useful if you have elements that can be both clicked or dragged.</div>
       </div>
     </div>
     <pre>
