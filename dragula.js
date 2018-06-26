@@ -39,6 +39,7 @@ function dragula (initialContainers, options) {
   if (o.direction === void 0) { o.direction = 'vertical'; }
   if (o.ignoreInputTextSelection === void 0) { o.ignoreInputTextSelection = true; }
   if (o.mirrorContainer === void 0) { o.mirrorContainer = doc.body; }
+  if (o.animate === void 0) { o.animate = { duration: 150, moveBuffer: 0 } }
 
   var drake = emitter({
     containers: o.containers,
@@ -370,17 +371,17 @@ function dragula (initialContainers, options) {
                        parseInt(sibStyles.marginTop, 10);
       var newSibPos = parseInt(itemStyles.height, 10) +
                       parseInt(itemStyles.marginBottom, 10);
-      sib.style.transition = 'all 150ms';
-      sib.style.transform = `translateY(${sNeg}${newSibPos}px)`;
-      item.style.transition = 'all 150ms';
-      item.style.transform = `translateY(${iNeg}${newItemPos}px)`;
+      sib.style.transition = `all ${o.animate.duration}ms`;
+      sib.style.transform = `translateY(${sNeg}${newSibPos + o.animate.moveBuffer}px)`;
+      item.style.transition = `all ${o.animate.duration}ms`;
+      item.style.transform = `translateY(${iNeg}${newItemPos + o.animate.moveBuffer}px)`;
       setTimeout(function() {
         sib.style.transition = '';
         sib.style.transform = '';
         item.style.transition = '';
         item.style.transform = '';
         target.insertBefore(item, sibling);
-      }, 150);
+      }, o.animate.duration);
     };
 
     if (prevSibling && d === 'up') {
