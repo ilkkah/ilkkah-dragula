@@ -400,7 +400,7 @@ function dragula (initialContainers, options) {
         var sibStyles = window.getComputedStyle(sib);
         var sibRect = sib.getBoundingClientRect();
         var newItemPos = parseInt(sibStyles.height, 10) +
-                         parseInt(sibStyles.marginTop, 10);
+                         parseInt(sibStyles.marginBottom, 10);
         var newSibPos = parseInt(itemStyles.height, 10) +
                         parseInt(itemStyles.marginBottom, 10);
         sib.style.transition = `all ${o.animate.duration}ms`;
