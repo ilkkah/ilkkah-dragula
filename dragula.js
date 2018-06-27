@@ -367,7 +367,7 @@ function dragula (initialContainers, options) {
   var mouseStartX = 0;
   var direction = null;
 
-  function animate(item, sibling, d, target) {
+  function animate(item, sibling, d, target, source) {
 
     const classes = [].slice.apply(target.classList);
 
@@ -375,8 +375,7 @@ function dragula (initialContainers, options) {
       return o.animate.noAnimateClass.indexOf(v) >= 0;
     });
 
-
-    if (!hasNoAnimateClass) {
+    if (!hasNoAnimateClass && target.children.length > 0) {
       var prevSibling = sibling;
       var nextSibling = nextEl(item);
 
@@ -412,10 +411,12 @@ function dragula (initialContainers, options) {
                          parseInt(sMargin, 10);
         var newSibPos = parseInt(itemStyles.height, 10) +
                         parseInt(iMargin, 10);
+        if (target === source) {
+          item.style.transition = `all ${o.animate.duration}ms`;
+          item.style.transform = `translateY(${iNeg}${newItemPos + moveBuffer.item}px)`;
+        }
         sib.style.transition = `all ${o.animate.duration}ms`;
         sib.style.transform = `translateY(${sNeg}${newSibPos}px)`;
-        item.style.transition = `all ${o.animate.duration}ms`;
-        item.style.transform = `translateY(${iNeg}${newItemPos + moveBuffer.item}px)`;
         setTimeout(function() {
           sib.style.transition = '';
           sib.style.transform = '';
@@ -508,7 +509,7 @@ function dragula (initialContainers, options) {
       reference !== nextEl(item)
     ) {
       _currentSibling = reference;
-      animate(item, reference, direction, dropTarget);
+      animate(item, reference, direction, dropTarget, _source);
       drake.emit('shadow', item, dropTarget, _source);
     }
     function moved (type) { drake.emit(type, item, _lastDropTarget, _source); }
