@@ -42,9 +42,6 @@ function dragula (initialContainers, options) {
   if (o.animate === void 0) {
     o.animate = {
       duration: 150,
-      upBuffer: 0,
-      downBuffer: 0,
-      bufferClass: 'container',
       noAnimateClass: '',
     }
   }
@@ -368,7 +365,14 @@ function dragula (initialContainers, options) {
   var direction = null;
 
   function animate(item, sibling, d, target, source) {
+    var oldItemRect = item.getBoundingClientRect();
+    var prevSibling = item.previousElementSibling;
+    var oldPrevSiblingRect = prevSibling ? prevSibling.getBoundingClientRect() : null;
+    var nextSibling = nextEl(item);
+    var oldNextSiblingRect = nextSibling ? nextSibling.getBoundingClientRect(): null;
 
+    target.insertBefore(item, sibling);
+    drake.emit('insert', item, prevSibling, nextSibling);
     const classes = [].slice.apply(target.classList);
 
     var hasNoAnimateClass = classes.some(function(v) {
@@ -376,70 +380,34 @@ function dragula (initialContainers, options) {
     });
 
     if (!hasNoAnimateClass && target.children.length > 0) {
-      var prevSibling = sibling;
-      var nextSibling = nextEl(item);
 
-      function runAnimation(sib, iNeg, sNeg) {
-        let moveBuffer = { sib: 0, item: 0 };
-
-        var hasBufferClass = classes.some(function(v) {
-          return o.animate.bufferClass.indexOf(v) >= 0;
-        });
-
-        if (hasBufferClass) {
-          if (iNeg === '-' && sNeg === '') {
-            moveBuffer.item = o.animate.upBuffer;
-          } else if (iNeg === '' && sNeg === '-'){
-            moveBuffer.item = o.animate.downBuffer;
-          }
-        }
-
-        var itemStyles = window.getComputedStyle(item);
-        var itemRect = item.getBoundingClientRect();
-        var sibStyles = window.getComputedStyle(sib);
-        var sibRect = sib.getBoundingClientRect();
-        let sMargin = sibStyles.marginBottom;
-        let iMargin = itemStyles.marginBottom;
-        // compensate for last child no margins
-        if (sMargin !== iMargin) {
-          const margin = parseInt(itemStyles.marginBottom ,10) !== 0 ? parseInt(itemStyles.marginBottom ,10) :
-                   parseInt(sibStyles.marginBottom, 10);
-          sMargin = margin;
-          iMargin = margin;
-        };
-        var newItemPos = parseInt(sibStyles.height, 10) +
-                         parseInt(sMargin, 10);
-        var newSibPos = parseInt(itemStyles.height, 10) +
-                        parseInt(iMargin, 10);
-        if (target === source) {
-          item.style.transition = `all ${o.animate.duration}ms`;
-          item.style.transform = `translateY(${iNeg}${newItemPos + moveBuffer.item}px)`;
-        }
-        sib.style.transition = `all ${o.animate.duration}ms`;
-        sib.style.transform = `translateY(${sNeg}${newSibPos}px)`;
-        setTimeout(function() {
-          sib.style.transition = '';
-          sib.style.transform = '';
-          item.style.transition = '';
-          item.style.transform = '';
-          target.insertBefore(item, sibling);
+      function runAnimation(el, oldRect) {
+        // get new rect values
+        var newRect = el.getBoundingClientRect();
+        var newY = oldRect.top - newRect.top;
+        // run inline styling
+        el.style.transition = 'none';
+        el.style.transform = `translate3d(0px, ${newY}px, 0px)`;
+        el.offsetWidth;
+        el.style.transition = `all ${o.animate.duration}ms`;
+        el.style.transform = 'translate3d(0,0,0)';
+        clearTimeout(el.animated);
+        el.animated = setTimeout(function() {
+          el.style.transition = '';
+          el.style.transform = '';
+          el.animated = false;
         }, o.animate.duration);
-      };
-
+      }
       if (prevSibling && d === 'up') {
         // animate the previous sibling down & the item up
-        runAnimation(prevSibling, '-', '');
+        runAnimation(item, oldItemRect);
+        runAnimation(prevSibling, oldPrevSiblingRect);
       }
       if (nextSibling && d === 'down') {
         // animate the previous sibling up & the item down
-        runAnimation(nextSibling, '', '-');
+        runAnimation(item, oldItemRect);
+        runAnimation(nextSibling, oldNextSiblingRect);
       }
-
-      if (!sibling && !nextSibling) {
-        target.insertBefore(item, sibling);
-      }
-    } else {
-      target.insertBefore(item, sibling);
     }
   };
 
@@ -462,10 +430,10 @@ function dragula (initialContainers, options) {
       direction = 'down';
     }
     if (event.pageX < mouseStartX) {
-      direction = "left"
+      // direction is left
     }
     if (event.pageX > mouseStartX) {
-      direction = "right"
+    // direction is right
     }
 
     mouseStartY = event.pageY;
