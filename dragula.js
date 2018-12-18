@@ -25,6 +25,7 @@ function dragula (initialContainers, options) {
   var _renderTimer; // timer for setTimeout renderMirrorImage
   var _lastDropTarget = null; // last container item was over
   var _grabbed; // holds mousedown context until first mousemove
+  var _ghostDiff = 0; // for recalculating custom ghost heights
 
   var o = options || {};
   if (o.moves === void 0) { o.moves = always; }
@@ -39,6 +40,7 @@ function dragula (initialContainers, options) {
   if (o.direction === void 0) { o.direction = 'vertical'; }
   if (o.ignoreInputTextSelection === void 0) { o.ignoreInputTextSelection = true; }
   if (o.mirrorContainer === void 0) { o.mirrorContainer = doc.body; }
+  if (o.customGhost === void 0) { o.customGhost = false; }
   if (o.animate === void 0) {
     o.animate = {
       duration: 150,
@@ -148,11 +150,16 @@ function dragula (initialContainers, options) {
     end();
     start(grabbed);
 
+    classes.add(_copy || _item, 'gu-transit');
+
     var offset = getOffset(_item);
     _offsetX = getCoord('pageX', e) - offset.left;
     _offsetY = getCoord('pageY', e) - offset.top;
 
-    classes.add(_copy || _item, 'gu-transit');
+    if (o.customGhost) {
+      _ghostDiff = e.pageY - offset.top - 15;
+    }
+
     renderMirrorImage();
     drag(e);
   }
@@ -439,10 +446,11 @@ function dragula (initialContainers, options) {
     mouseStartY = event.pageY;
     mouseStartX = event.pageX;
 
-    _mirror.style.left = x + 'px';
-    _mirror.style.top = y + 'px';
-
     var item = _copy || _item;
+
+    _mirror.style.left = x + 'px';
+    _mirror.style.top = y + _ghostDiff + 'px';
+
     var elementBehindCursor = getElementBehindPoint(_mirror, clientX, clientY);
     var dropTarget = findDropTarget(elementBehindCursor, clientX, clientY);
     var changed = dropTarget !== null && dropTarget !== _lastDropTarget;
