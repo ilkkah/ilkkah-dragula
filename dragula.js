@@ -145,8 +145,10 @@ function dragula (initialContainers, options) {
     var offset = getOffset(_item);
     _offsetX = getCoord('pageX', e) - offset.left;
     _offsetY = getCoord('pageY', e) - offset.top;
-
-    classes.add(_copy || _item, 'gu-transit');
+    if (_copy) {
+      classes.add(_copy, 'gu-transit');
+    }
+    classes.add(_item, 'gu-transit');
     renderMirrorImage();
     drag(e);
   }
@@ -305,8 +307,11 @@ function dragula (initialContainers, options) {
     var item = _copy || _item;
     ungrab();
     removeMirrorImage();
-    if (item) {
-      classes.rm(item, 'gu-transit');
+    if (_copy) {
+      classes.rm(_copy, 'gu-transit');
+    }
+    if (_item) {
+      classes.rm(_item, 'gu-transit');
     }
     if (_renderTimer) {
       clearTimeout(_renderTimer);
