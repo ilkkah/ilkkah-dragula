@@ -155,7 +155,7 @@ dragula([document.getElementById(left), document.getElementById(right)], {
     <label for='hy'>Copying stuff from only one of the containers and sorting on the other one? No problem!</label>
     <div class='wrapper'>
       <div id='left-copy-1tomany' class='container'>
-        <div>When elements are copyable, they can't be sorted in their origin container</div>
+        <div onmousedown="window.handle = 'CHECK'">When elements are copyable, they can't be sorted in their origin container</div>
         <div>Copying prevents original elements from being dragged. A copy gets created and <em>that</em> gets dragged instead</div>
         <div>Whenever that happens, a <code>cloned</code> event is raised</div>
         <div>Note that the clones get destroyed if they're not dropped into another container</div>

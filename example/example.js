@@ -33,6 +33,9 @@ dragula([$('left-lovehandles'), $('right-lovehandles')], {
 
 dragula([$('left-rm-spill'), $('right-rm-spill')], { removeOnSpill: true });
 dragula([$('left-copy-1tomany'), $('right-copy-1tomany')], {
+  copySortSource: function () {
+    return true;
+  },
   copy: function (el, source) {
     return source === $('left-copy-1tomany');
   },
