@@ -586,7 +586,7 @@ function isEditable (el) {
 }
 
 function nextEl (el) {
-  return el.nextElementSibling || manually();
+  return el.nextSibling || manually();
   function manually () {
     var sibling = el;
     do {
