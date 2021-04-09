@@ -45,7 +45,7 @@ function dragula (initialContainers, options) {
     o.animate = {
       duration: 150,
       noAnimateClass: '',
-    }
+    };
   }
   if (o.uglyHack === void 0) { o.uglyHack = false; }
 
@@ -61,12 +61,12 @@ function dragula (initialContainers, options) {
   });
 
   function getCopySortSource (item, target, source) {
-    let copySortSource = o.copySortSource;
+    var copySortSource = o.copySortSource;
     if (typeof copySortSource === 'function') {
       copySortSource = copySortSource(item, target, source);
     }
     return copySortSource;
-  };
+  }
 
   if (o.removeOnSpill === true) {
     drake.on('over', spillOver).on('out', spillOut);
@@ -286,7 +286,7 @@ function dragula (initialContainers, options) {
 
   function drop (item, target) {
     var parent = getParent(item);
-    const copySortSource = getCopySortSource(item, target, _source);
+    var copySortSource = getCopySortSource(item, target, _source);
     if (_copy && parent && copySortSource && target === _source) {
       parent.removeChild(_item);
     }
@@ -393,16 +393,34 @@ function dragula (initialContainers, options) {
   var mouseStartX = 0;
   var direction = null;
 
-  function animate(item, sibling, d, target, source) {
+  function animate(item, sibling, d, target) {
     var oldItemRect = item.getBoundingClientRect();
     var prevSibling = item.previousElementSibling;
     var oldPrevSiblingRect = prevSibling ? prevSibling.getBoundingClientRect() : null;
     var nextSibling = nextEl(item);
     var oldNextSiblingRect = nextSibling ? nextSibling.getBoundingClientRect(): null;
 
+    function runAnimation(el, oldRect) {
+      // get new rect values
+      var newRect = el.getBoundingClientRect();
+      var newY = oldRect.top - newRect.top;
+      // run inline styling
+      el.style.transition = 'none';
+      el.style.transform = 'translate3d(0px, ' + newY + 'px, 0px)';
+      el.offsetWidth;
+      el.style.transition = 'all ' + o.animate.duration + 'ms';
+      el.style.transform = 'translate3d(0,0,0)';
+      clearTimeout(el.animated);
+      el.animated = setTimeout(function() {
+        el.style.transition = '';
+        el.style.transform = '';
+        el.animated = false;
+      }, o.animate.duration);
+    }
+
     target.insertBefore(item, sibling);
     drake.emit('insert', item, prevSibling, nextSibling);
-    const classes = [].slice.apply(target.classList);
+    var classes = [].slice.apply(target.classList);
 
     var hasNoAnimateClass = classes.some(function(v) {
       return o.animate.noAnimateClass.indexOf(v) >= 0;
@@ -410,23 +428,6 @@ function dragula (initialContainers, options) {
 
     if (!hasNoAnimateClass && target.children.length > 0) {
 
-      function runAnimation(el, oldRect) {
-        // get new rect values
-        var newRect = el.getBoundingClientRect();
-        var newY = oldRect.top - newRect.top;
-        // run inline styling
-        el.style.transition = 'none';
-        el.style.transform = `translate3d(0px, ${newY}px, 0px)`;
-        el.offsetWidth;
-        el.style.transition = `all ${o.animate.duration}ms`;
-        el.style.transform = 'translate3d(0,0,0)';
-        clearTimeout(el.animated);
-        el.animated = setTimeout(function() {
-          el.style.transition = '';
-          el.style.transform = '';
-          el.animated = false;
-        }, o.animate.duration);
-      }
       if (prevSibling && d === 'up') {
         // animate the previous sibling down & the item up
         runAnimation(item, oldItemRect);
@@ -438,7 +439,7 @@ function dragula (initialContainers, options) {
         runAnimation(nextSibling, oldNextSiblingRect);
       }
     }
-  };
+  }
 
   function drag (e) {
     if (!_mirror) {
@@ -458,12 +459,12 @@ function dragula (initialContainers, options) {
     if (event.pageY > mouseStartY) {
       direction = 'down';
     }
-    if (event.pageX < mouseStartX) {
-      // direction is left
-    }
-    if (event.pageX > mouseStartX) {
-    // direction is right
-    }
+    // if (event.pageX < mouseStartX) {
+    //   // direction is left
+    // }
+    // if (event.pageX > mouseStartX) {
+    // // direction is right
+    // }
 
     mouseStartY = event.pageY;
     mouseStartX = event.pageX;
@@ -473,7 +474,6 @@ function dragula (initialContainers, options) {
     _mirror.style.left = x + 'px';
     _mirror.style.top = y + _ghostDiff + 'px';
 
-    var item = _copy || _item;
     var elementBehindCursor = getElementBehindPoint(_mirror, clientX, clientY);
     var dropTarget = findDropTarget(elementBehindCursor, clientX, clientY);
     var changed = dropTarget !== null && dropTarget !== _lastDropTarget;
