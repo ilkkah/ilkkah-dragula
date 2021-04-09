@@ -76,7 +76,6 @@ function dragula (initialContainers, options) {
   if (o.direction === void 0) { o.direction = 'vertical'; }
   if (o.ignoreInputTextSelection === void 0) { o.ignoreInputTextSelection = true; }
   if (o.mirrorContainer === void 0) { o.mirrorContainer = doc.body; }
-  if (o.uglyHack === void 0) { o.uglyHack = false; }
 
   var drake = emitter({
     containers: o.containers,
@@ -154,8 +153,6 @@ function dragula (initialContainers, options) {
   }
 
   function startBecauseMouseMoved (e) {
-    var offset;
-
     if (!_grabbed) {
       return;
     }
@@ -182,21 +179,11 @@ function dragula (initialContainers, options) {
     end();
     start(grabbed);
 
-    if (o.uglyHack) {
-      offset = _item.getBoundingClientRect();
-      _offsetX = offset.left - _item.offsetLeft;
-      _offsetY = offset.top - _item.offsetTop;
-    }
-    else {
-      offset = getOffset(_item);
-      _offsetX = getCoord('pageX', e) - offset.left;
-      _offsetY = getCoord('pageY', e) - offset.top;
-    }
+    var offset = getOffset(_item);
+    _offsetX = getCoord('pageX', e) - offset.left;
+    _offsetY = getCoord('pageY', e) - offset.top;
 
-    if (_copy) {
-      classes.add(_copy, 'gu-transit');
-    }
-    classes.add(_item, 'gu-transit');
+    classes.add(_copy || _item, 'gu-transit');
     renderMirrorImage();
     drag(e);
   }
@@ -355,11 +342,8 @@ function dragula (initialContainers, options) {
     var item = _copy || _item;
     ungrab();
     removeMirrorImage();
-    if (_copy) {
-      classes.rm(_copy, 'gu-transit');
-    }
-    if (_item) {
-      classes.rm(_item, 'gu-transit');
+    if (item) {
+      classes.rm(item, 'gu-transit');
     }
     if (_renderTimer) {
       clearTimeout(_renderTimer);
@@ -623,7 +607,7 @@ function isEditable (el) {
 }
 
 function nextEl (el) {
-  return el.nextSibling || manually();
+  return el.nextElementSibling || manually();
   function manually () {
     var sibling = el;
     do {
